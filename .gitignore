@@ -12,6 +12,7 @@ frontend/to_do_app/dist/
 
 # Environment variables
 .env
+.env
 .env.local
 .env.development.local
 .env.test.local

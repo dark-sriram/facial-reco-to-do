@@ -1,7 +1,35 @@
 import axios from "axios";
 
-const api=axios.create({
-    baseURL : "http://localhost:5001/api"    
-})
+const api = axios.create({
+    baseURL: "http://localhost:5000/api",
+    timeout: 10000,
+    headers: {
+        'Content-Type': 'application/json',
+    }
+});
 
-export default api
+// Add request interceptor for debugging
+api.interceptors.request.use(
+    (config) => {
+        console.log(`Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
+        return config;
+    },
+    (error) => {
+        console.error('Request error:', error);
+        return Promise.reject(error);
+    }
+);
+
+// Add response interceptor for debugging
+api.interceptors.response.use(
+    (response) => {
+        console.log(`Response from ${response.config.url}:`, response.status);
+        return response;
+    },
+    (error) => {
+        console.error('Response error:', error.response?.status, error.response?.data);
+        return Promise.reject(error);
+    }
+);
+
+export default api;

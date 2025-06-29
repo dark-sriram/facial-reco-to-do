@@ -10,6 +10,24 @@ const noteSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+        priority: {
+            type: String,
+            enum: ['low', 'medium', 'high'],
+            default: 'medium',
+        },
+        completed: {
+            type: Boolean,
+            default: false,
+        },
+        dueDate: {
+            type: Date,
+            required: false,
+        },
     },
     { timestamps: true }
 );

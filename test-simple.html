@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CRUD Test</title>
+</head>
+<body>
+    <h1>CRUD Operations Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        async function testBackend() {
+            try {
+                results.innerHTML += '<p>Testing backend connectivity...</p>';
+                
+                // Test basic connectivity
+                const testResponse = await fetch('http://localhost:5000/api/test');
+                if (testResponse.ok) {
+                    const data = await testResponse.json();
+                    results.innerHTML += `<p>✅ Backend test: ${data.message}</p>`;
+                } else {
+                    results.innerHTML += `<p>❌ Backend test failed: ${testResponse.status}</p>`;
+                    return;
+                }
+                
+                // Test users endpoint
+                const usersResponse = await fetch('http://localhost:5000/api/users');
+                if (usersResponse.ok) {
+                    const users = await usersResponse.json();
+                    results.innerHTML += `<p>✅ Users endpoint: Found ${users.length} users</p>`;
+                    
+                    if (users.length > 0) {
+                        const userId = users[0]._id;
+                        results.innerHTML += `<p>Using user ID: ${userId}</p>`;
+                        
+                        // Test CRUD operations
+                        await testCRUD(userId);
+                    } else {
+                        results.innerHTML += '<p>⚠️ No users found. Please register a user first.</p>';
+                    }
+                } else {
+                    results.innerHTML += `<p>❌ Users endpoint failed: ${usersResponse.status}</p>`;
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p>❌ Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function testCRUD(userId) {
+            try {
+                // CREATE
+                results.innerHTML += '<p>Testing CREATE...</p>';
+                const createResponse = await fetch('http://localhost:5000/api/notes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: 'Test Task',
+                        content: 'This is a test task',
+                        userId: userId,
+                        priority: 'medium'
+                    }),
+                });
+                
+                if (createResponse.ok) {
+                    const createData = await createResponse.json();
+                    results.innerHTML += `<p>✅ CREATE successful: ${createData.message}</p>`;
+                    const noteId = createData.note._id;
+                    
+                    // READ
+                    results.innerHTML += '<p>Testing READ...</p>';
+                    const readResponse = await fetch(`http://localhost:5000/api/notes?userId=${userId}`);
+                    if (readResponse.ok) {
+                        const notes = await readResponse.json();
+                        results.innerHTML += `<p>✅ READ successful: Found ${notes.length} notes</p>`;
+                    }
+                    
+                    // UPDATE
+                    results.innerHTML += '<p>Testing UPDATE...</p>';
+                    const updateResponse = await fetch(`http://localhost:5000/api/notes/${noteId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            title: 'Updated Test Task',
+                            content: 'This task has been updated',
+                            completed: true
+                        }),
+                    });
+                    
+                    if (updateResponse.ok) {
+                        results.innerHTML += '<p>✅ UPDATE successful</p>';
+                    }
+                    
+                    // DELETE
+                    results.innerHTML += '<p>Testing DELETE...</p>';
+                    const deleteResponse = await fetch(`http://localhost:5000/api/notes/${noteId}`, {
+                        method: 'DELETE',
+                    });
+                    
+                    if (deleteResponse.ok) {
+                        results.innerHTML += '<p>✅ DELETE successful</p>';
+                    }
+                    
+                } else {
+                    const errorData = await createResponse.json();
+                    results.innerHTML += `<p>❌ CREATE failed: ${errorData.message}</p>`;
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p>❌ CRUD Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Run test when page loads
+        testBackend();
+    </script>
+</body>
+</html>

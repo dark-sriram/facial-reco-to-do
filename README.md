@@ -1,6 +1,6 @@
-# 📝 Note Taking Application
+# 🎭 Face Recognition To-Do Application
 
-A full-stack MERN (MongoDB, Express.js, React, Node.js) note-taking application that allows users to create, read, update, and delete notes with a modern and responsive user interface.
+A modern to-do list application that uses facial recognition for user authentication. Each user's tasks are personalized and accessible only through face recognition login.
 
 ## ✨ Features
 
