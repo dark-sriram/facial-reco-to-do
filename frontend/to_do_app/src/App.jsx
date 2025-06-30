@@ -4,43 +4,71 @@ import { Toaster } from 'react-hot-toast';
 import HomePage from './pages/HomePage'
 import CreatePage from './pages/CreatePage';
 import DetailPage from './pages/DetailPage';
-import FaceLoginFixed from './components/FaceLoginFixed';
+import EnhancedFaceLogin from './components/EnhancedFaceLogin';
+import EnhancedNotesInterface from './components/EnhancedNotesInterface';
+import ErrorBoundary from './components/ErrorBoundary';
+import PerformanceMonitor from './components/PerformanceMonitor';
 import { UserProvider, useUser } from './context/UserContext';
 
 const AppContent = () => {
-    const { isAuthenticated, login, register } = useUser();
+    const { isAuthenticated, user, login, register, logout } = useUser();
 
     if (!isAuthenticated) {
-        return <FaceLoginFixed onLogin={login} onRegister={register} />;
+        return <EnhancedFaceLogin onLogin={login} onRegister={register} />;
     }
 
+    // For the main route, use the enhanced interface
     return (
-        <div className='relative h-full w-full'>
-            <div className="absolute inset-0 -z-10 h-full w-full items-center px-5 py-24 [background:radial-gradient(125%_125%_at_50%_10%,#000_60%,#CC5500_100%)]" />
-            <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/create" element={<CreatePage />} />
-                <Route path="/notes/:id" element={<DetailPage />} />
-            </Routes>
-        </div>
+        <Routes>
+            <Route path="/" element={<EnhancedNotesInterface user={user} onLogout={logout} />} />
+            <Route path="/legacy" element={
+                <div className='relative h-full w-full'>
+                    <div className="absolute inset-0 -z-10 h-full w-full items-center px-5 py-24 [background:radial-gradient(125%_125%_at_50%_10%,#000_60%,#CC5500_100%)]" />
+                    <Routes>
+                        <Route path="/legacy" element={<HomePage />} />
+                        <Route path="/legacy/create" element={<CreatePage />} />
+                        <Route path="/legacy/notes/:id" element={<DetailPage />} />
+                    </Routes>
+                </div>
+            } />
+            <Route path="/create" element={<CreatePage />} />
+            <Route path="/notes/:id" element={<DetailPage />} />
+        </Routes>
     );
 };
 
 const App = () => {
     return (
-        <UserProvider>
-            <AppContent />
-            <Toaster 
-                position="top-right"
-                toastOptions={{
-                    duration: 3000,
-                    style: {
-                        background: '#363636',
-                        color: '#fff',
-                    },
-                }}
-            />
-        </UserProvider>
+        <ErrorBoundary>
+            <UserProvider>
+                <AppContent />
+                <Toaster 
+                    position="top-right"
+                    toastOptions={{
+                        duration: 4000,
+                        style: {
+                            background: '#363636',
+                            color: '#fff',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                        },
+                        success: {
+                            iconTheme: {
+                                primary: '#10B981',
+                                secondary: '#fff',
+                            },
+                        },
+                        error: {
+                            iconTheme: {
+                                primary: '#EF4444',
+                                secondary: '#fff',
+                            },
+                        },
+                    }}
+                />
+                <PerformanceMonitor />
+            </UserProvider>
+        </ErrorBoundary>
     );
 };
 

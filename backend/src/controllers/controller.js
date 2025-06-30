@@ -1,4 +1,5 @@
 import Note from '../model/Note.js';
+import { db } from '../config/dbAdapter.js';
 
 export async function getAll(req, res) {
     try {
@@ -12,7 +13,7 @@ export async function getAll(req, res) {
             return res.status(400).json({ message: 'User ID is required' });
         }
 
-        const notes = await Note.find({ userId }).sort({ createdAt: -1 });
+        const notes = await db.findNotes({ userId });
         console.log(`Found ${notes.length} notes for user ${userId}`);
         
         res.status(200).json(notes);
@@ -26,7 +27,7 @@ export async function getnotebyid(req, res) {
     try {
         console.log('GET /notes/:id request received for ID:', req.params.id);
         
-        const note = await Note.findById(req.params.id);
+        const note = await db.findNoteById(req.params.id);
         if (!note) {
             console.log('Note not found for ID:', req.params.id);
             return res.status(404).json({ message: 'Note not found' });
@@ -57,7 +58,7 @@ export async function createAll(req, res) {
             return res.status(400).json({ message: 'User ID is required' });
         }
 
-        const newNote = new Note({ 
+        const newNote = await db.createNote({ 
             title, 
             content, 
             userId,
@@ -66,8 +67,7 @@ export async function createAll(req, res) {
             completed: false
         });
 
-        await newNote.save();
-        console.log('Note created successfully:', newNote._id);
+        console.log('Note created successfully:', newNote._id || newNote.id);
         
         res.status(201).json({ 
             message: 'Task created successfully!',
@@ -93,18 +93,18 @@ export async function putALL(req, res) {
         if (completed !== undefined) updateData.completed = completed;
         if (dueDate !== undefined) updateData.dueDate = dueDate;
         
-        const updatedNote = await Note.findByIdAndUpdate(
-            req.params.id,
-            updateData,
-            { new: true, runValidators: true }
+        const result = await db.updateNote(
+            { _id: req.params.id },
+            { $set: updateData }
         );
         
-        if (!updatedNote) {
+        if (result.modifiedCount === 0) {
             console.log('Note not found for update:', req.params.id);
             return res.status(404).json({ message: 'Note not found' });
         }
 
-        console.log('Note updated successfully:', updatedNote._id);
+        const updatedNote = await db.findNoteById(req.params.id);
+        console.log('Note updated successfully:', updatedNote._id || updatedNote.id);
         res.status(200).json(updatedNote);
     } catch (error) {
         console.error('Error in putAll controller:', error);
@@ -116,8 +116,8 @@ export async function deleteAll(req, res) {
     try {
         console.log('DELETE /notes/:id request received for ID:', req.params.id);
         
-        const deletedNote = await Note.findByIdAndDelete(req.params.id);
-        if (!deletedNote) {
+        const result = await db.deleteNote({ _id: req.params.id });
+        if (result.deletedCount === 0) {
             console.log('Note not found for deletion:', req.params.id);
             return res.status(404).json({ message: 'Note not found' });
         }

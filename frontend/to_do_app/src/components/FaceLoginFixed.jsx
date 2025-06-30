@@ -3,6 +3,7 @@ import Webcam from 'react-webcam';
 import * as faceapi from 'face-api.js';
 import toast from 'react-hot-toast';
 import { Camera, Loader, User, RefreshCw } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api.js';
 
 const FaceLoginFixed = ({ onLogin, onRegister }) => {
     const webcamRef = useRef(null);
@@ -15,6 +16,8 @@ const FaceLoginFixed = ({ onLogin, onRegister }) => {
     const [modelLoadingProgress, setModelLoadingProgress] = useState('');
     const [cameraReady, setCameraReady] = useState(false);
     const [detectionResults, setDetectionResults] = useState(null);
+    const [retryCount, setRetryCount] = useState(0);
+    const [isRetrying, setIsRetrying] = useState(false);
 
     useEffect(() => {
         loadModels();
@@ -77,12 +80,12 @@ const FaceLoginFixed = ({ onLogin, onRegister }) => {
     const testFaceDetection = async () => {
         if (!isModelLoaded) {
             toast.error('Models are still loading...');
-            return;
+            return false;
         }
 
         if (!webcamRef.current || !cameraReady) {
             toast.error('Camera not ready. Please wait or refresh the page.');
-            return;
+            return false;
         }
 
         try {
@@ -91,34 +94,44 @@ const FaceLoginFixed = ({ onLogin, onRegister }) => {
             
             if (!imageSrc) {
                 toast.error('Failed to capture image. Please check camera permissions.');
-                return;
+                return false;
             }
 
             const img = await createImageElement(imageSrc);
             
-            // Use multiple detection strategies
+            // Use multiple detection strategies with progressive fallback
             const detectionOptions = [
                 new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.3 }),
                 new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.4 }),
-                new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 })
+                new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }),
+                new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.6 })
             ];
 
             let detections = null;
-            for (const options of detectionOptions) {
+            let usedOption = null;
+            
+            for (let i = 0; i < detectionOptions.length; i++) {
+                const options = detectionOptions[i];
                 detections = await faceapi.detectAllFaces(img, options);
-                if (detections.length > 0) break;
+                if (detections.length > 0) {
+                    usedOption = i;
+                    break;
+                }
             }
 
-            console.log('Detection results:', detections);
+            console.log('Detection results:', detections, 'Using option:', usedOption);
             setDetectionResults(detections);
 
             if (!detections || detections.length === 0) {
-                toast.error('❌ No face detected. Please:\n• Ensure good lighting\n• Face the camera directly\n• Move closer to camera\n• Remove glasses if causing glare');
-                return;
+                toast.error('❌ No face detected. Please:\n• Ensure good lighting\n• Face the camera directly\n• Move closer to camera\n• Remove glasses if causing glare', {
+                    duration: 5000
+                });
+                return false;
             }
 
             if (detections.length === 1) {
-                toast.success('✅ Perfect! One face detected clearly.');
+                const confidence = detections[0].score;
+                toast.success(`✅ Perfect! Face detected with ${(confidence * 100).toFixed(1)}% confidence.`);
                 return true;
             } else {
                 toast.warning(`⚠️ ${detections.length} faces detected. Please ensure only one person is visible.`);
@@ -199,7 +212,7 @@ const FaceLoginFixed = ({ onLogin, onRegister }) => {
             console.log('Registering user:', name);
             console.log('Face descriptor length:', faceDescriptor.length);
 
-            const response = await fetch('http://localhost:5000/api/users/register', {
+            const response = await fetch(API_ENDPOINTS.USERS.REGISTER, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -226,7 +239,11 @@ const FaceLoginFixed = ({ onLogin, onRegister }) => {
             }
         } catch (error) {
             console.error('Registration error:', error);
-            toast.error(`Registration failed: ${error.message}. Please check if the server is running.`);
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                toast.error('Cannot connect to server. Please ensure the backend is running.');
+            } else {
+                toast.error(`Registration failed: ${error.message}`);
+            }
         }
     };
 
@@ -234,7 +251,7 @@ const FaceLoginFixed = ({ onLogin, onRegister }) => {
         try {
             console.log('Authenticating user...');
             
-            const response = await fetch('http://localhost:5000/api/users/authenticate', {
+            const response = await fetch(API_ENDPOINTS.USERS.AUTHENTICATE, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -250,11 +267,21 @@ const FaceLoginFixed = ({ onLogin, onRegister }) => {
                 onLogin(data.user);
                 console.log('User authenticated and logged in:', data.user);
             } else {
-                toast.error('❌ Face not recognized. Please try again or register first.');
+                setRetryCount(prev => prev + 1);
+                if (retryCount < 2) {
+                    toast.error(`❌ Face not recognized. Try ${3 - retryCount - 1} more time(s) or register first.`);
+                } else {
+                    toast.error('❌ Face not recognized after multiple attempts. Please register first or try with better lighting.');
+                    setRetryCount(0);
+                }
             }
         } catch (error) {
             console.error('Authentication error:', error);
-            toast.error(`Authentication failed: ${error.message}`);
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                toast.error('Cannot connect to server. Please ensure the backend is running.');
+            } else {
+                toast.error(`Authentication failed: ${error.message}`);
+            }
         }
     };
 
@@ -351,11 +378,16 @@ const FaceLoginFixed = ({ onLogin, onRegister }) => {
                         
                         {/* Loading Overlay */}
                         {(!isModelLoaded || !cameraReady) && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-                                <div className="text-white text-center">
-                                    <Loader className="animate-spin mx-auto mb-2" size={24} />
-                                    <p className="text-sm">{modelLoadingProgress}</p>
-                                    {!cameraReady && <p className="text-xs mt-1">Waiting for camera...</p>}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                                <div className="text-white text-center p-4 rounded-lg bg-black/50">
+                                    <Loader className="animate-spin mx-auto mb-3" size={32} />
+                                    <p className="text-sm font-medium">{modelLoadingProgress}</p>
+                                    {!cameraReady && <p className="text-xs mt-2 text-blue-200">Waiting for camera access...</p>}
+                                    <div className="mt-3 w-32 bg-gray-700 rounded-full h-2">
+                                        <div className={`bg-blue-500 h-2 rounded-full transition-all duration-300 ${
+                                            isModelLoaded ? 'w-full' : 'w-1/2'
+                                        }`}></div>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -407,7 +439,7 @@ const FaceLoginFixed = ({ onLogin, onRegister }) => {
                     <div className="text-xs space-y-1">
                         <p>Models: {isModelLoaded ? '✅ Ready' : '⏳ Loading...'}</p>
                         <p>Camera: {cameraReady ? '✅ Ready' : '❌ Not Ready'}</p>
-                        <p>Backend: http://localhost:5000</p>
+                        <p>Backend: {API_ENDPOINTS.BASE}</p>
                     </div>
                 </div>
             </div>

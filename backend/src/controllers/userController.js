@@ -1,4 +1,5 @@
 import User from '../model/User.js';
+import { db } from '../config/dbAdapter.js';
 
 // Register a new user with face descriptor
 export async function registerUser(req, res) {
@@ -21,25 +22,24 @@ export async function registerUser(req, res) {
         }
 
         // Check if user already exists
-        const existingUser = await User.findOne({ name });
+        const existingUser = await db.findUserByName(name);
         if (existingUser) {
             console.log('User already exists:', name);
             return res.status(400).json({ message: 'User with this name already exists' });
         }
 
         console.log('Creating new user...');
-        const newUser = new User({ 
+        const newUser = await db.createUser({ 
             name, 
             faceDescriptor,
             profileImage 
         });
 
-        await newUser.save();
-        console.log('User saved successfully:', newUser._id);
+        console.log('User saved successfully:', newUser._id || newUser.id);
         
         res.status(201).json({ 
             message: 'User registered successfully!',
-            userId: newUser._id,
+            userId: newUser._id || newUser.id,
             name: newUser.name
         });
     } catch (error) {
@@ -55,7 +55,7 @@ export async function registerUser(req, res) {
 export async function getAllUsers(req, res) {
     try {
         console.log('GET /users request received');
-        const users = await User.find({}, 'name profileImage createdAt');
+        const users = await db.findAllUsers();
         console.log(`Found ${users.length} users`);
         res.status(200).json(users);
     } catch (error) {
@@ -84,7 +84,7 @@ export async function authenticateUser(req, res) {
         }
 
         // Get all users to compare face descriptors
-        const users = await User.find({});
+        const users = await db.findAllUsers();
         console.log(`Found ${users.length} registered users for comparison`);
         
         if (users.length === 0) {
