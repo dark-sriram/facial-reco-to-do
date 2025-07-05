@@ -39,7 +39,7 @@ export async function registerUser(req, res) {
         
         res.status(201).json({ 
             message: 'User registered successfully!',
-            userId: newUser._id || newUser.id,
+            userId: (newUser._id || newUser.id).toString(),
             name: newUser.name
         });
     } catch (error) {
@@ -128,7 +128,7 @@ export async function authenticateUser(req, res) {
             res.status(200).json({
                 success: true,
                 user: {
-                    id: matchedUser._id,
+                    id: matchedUser._id.toString(),
                     name: matchedUser.name,
                     profileImage: matchedUser.profileImage
                 },

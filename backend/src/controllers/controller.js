@@ -4,22 +4,28 @@ import { db } from '../config/dbAdapter.js';
 export async function getAll(req, res) {
     try {
         console.log('GET /notes request received');
+        console.log('Query params:', req.query);
         const { userId } = req.query;
         
         console.log('Requested userId:', userId);
+        console.log('Database type:', db.getDatabaseType());
+        console.log('Using mock DB:', global.usingMockDb);
         
         if (!userId) {
             console.log('No userId provided');
             return res.status(400).json({ message: 'User ID is required' });
         }
 
+        console.log('Calling db.findNotes with query:', { userId });
         const notes = await db.findNotes({ userId });
         console.log(`Found ${notes.length} notes for user ${userId}`);
+        console.log('Notes:', notes);
         
         res.status(200).json(notes);
     } catch (error) {
         console.error('Error in getAll controller:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }
 
