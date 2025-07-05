@@ -8,13 +8,19 @@ import EnhancedFaceLogin from './components/EnhancedFaceLogin';
 import EnhancedNotesInterface from './components/EnhancedNotesInterface';
 import ErrorBoundary from './components/ErrorBoundary';
 import PerformanceMonitor from './components/PerformanceMonitor';
+import ApiTest from './components/ApiTest';
 import { UserProvider, useUser } from './context/UserContext';
 
 const AppContent = () => {
     const { isAuthenticated, user, login, register, logout } = useUser();
 
     if (!isAuthenticated) {
-        return <EnhancedFaceLogin onLogin={login} onRegister={register} />;
+        return (
+            <div>
+                <ApiTest />
+                <EnhancedFaceLogin onLogin={login} onRegister={register} />
+            </div>
+        );
     }
 
     // For the main route, use the enhanced interface
