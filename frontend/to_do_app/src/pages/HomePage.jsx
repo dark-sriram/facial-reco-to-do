@@ -49,31 +49,6 @@ const HomePage = () => {
         }
       }, [user]);
 
-      // Test function for CRUD operations
-      // const testCRUD = async () => {
-      //   try {
-      //     console.log('Testing CRUD with user ID:', user?.id);
-          
-      //     // Test CREATE
-      //     const createResponse = await api.post('/notes', {
-      //       title: 'Test Task',
-      //       content: 'This is a test task',
-      //       userId: user?.id,
-      //       priority: 'medium'
-      //     });
-          
-      //     console.log('Create response:', createResponse.data);
-      //     toast.success('Test task created!');
-          
-      //     // Refresh notes
-      //     const res = await api.get(`/notes?userId=${user.id}`);
-      //     setnote(res.data);
-          
-      //   } catch (error) {
-      //     console.error('CRUD test error:', error);
-      //     toast.error(`CRUD test failed: ${error.message}`);
-      //   }
-      // };
 
       return (
           <div className="min-h-screen">
@@ -81,20 +56,6 @@ const HomePage = () => {
       
               {isratelimited && <RateLimitedui />}
               
-              {/* Debug Panel
-              <div className="bg-yellow-100 p-4 m-4 rounded">
-                <h3 className="font-bold">Debug Info:</h3>
-                <p>User: {user?.name || 'Not logged in'}</p>
-                <p>User ID: {user?.id || 'No ID'}</p>
-                <p>Notes Count: {note.length}</p> */}
-                {/* <button 
-                  onClick={testCRUD}
-                  className="bg-blue-500 text-white px-4 py-2 rounded mt-2"
-                  disabled={!user?.id}
-                >
-                  Test CRUD Operations
-                </button> */}
-              {/* </div> */}
 
               <div className='max-w-7xl rounded-xl mx-auto p-6 mt-6 '>
                 {loading && (
