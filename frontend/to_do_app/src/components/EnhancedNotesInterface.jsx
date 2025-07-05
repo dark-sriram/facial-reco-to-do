@@ -19,10 +19,6 @@ import {
 import { API_BASE_URL } from '../config/api';
 
 const EnhancedNotesInterface = ({ user, onLogout }) => {
-    // Debug API configuration on component mount
-    console.log('=== COMPONENT MOUNT DEBUG ===');
-    console.log('API_BASE_URL at component level:', API_BASE_URL);
-    console.log('import.meta.env:', import.meta.env);
     
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -53,12 +49,7 @@ const EnhancedNotesInterface = ({ user, onLogout }) => {
             const userId = user.id || user._id;
             const url = `${API_BASE_URL}/api/notes?userId=${userId}`;
             
-            console.log('=== FETCH NOTES DEBUG ===');
-            console.log('API_BASE_URL:', API_BASE_URL);
-            console.log('User object:', user);
-            console.log('User ID:', userId);
-            console.log('Full URL:', url);
-            console.log('typeof API_BASE_URL:', typeof API_BASE_URL);
+
             
             const response = await fetch(url, {
                 method: 'GET',
@@ -67,25 +58,14 @@ const EnhancedNotesInterface = ({ user, onLogout }) => {
                 },
             });
             
-            console.log('Response received:', response.status, response.statusText);
-            
             if (response.ok) {
                 const data = await response.json();
-                console.log('Notes fetched successfully:', data);
                 setNotes(data);
             } else {
-                console.error('Failed to fetch notes, status:', response.status);
-                const errorText = await response.text();
-                console.error('Error response:', errorText);
-                toast.error(`Failed to fetch notes: ${response.status}`);
+                toast.error('Failed to fetch notes');
             }
         } catch (error) {
             console.error('Error fetching notes:', error);
-            console.error('Error details:', {
-                message: error.message,
-                name: error.name,
-                stack: error.stack
-            });
             toast.error('Network error while fetching notes');
         } finally {
             setLoading(false);
