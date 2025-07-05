@@ -4,22 +4,10 @@
   "description": "A modern to-do list application that uses facial recognition for user authentication. Each user's tasks are personalized and accessible only through face recognition login.",
   "main": "index.js",
   "scripts": {
-    "start": "node start-final.js",
-    "dev": "node start-final.js",
-    "dev:frontend": "node start-frontend.js",
-    "dev:backend": "node start-final.js",
-    "dev:original": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend/to_do_app\"",
     "build": "npm install --prefix backend && npm install --prefix frontend/to_do_app && npm run build --prefix frontend/to_do_app",
-    "start:production": "node start-production.js",
-    "start:backend": "npm run start --prefix backend",
-    "install-all": "npm install && npm install --prefix backend && npm install --prefix frontend/to_do_app",
-    "test": "npm run test --prefix backend",
-    "test:health": "node test-app.js",
-    "deploy:quick": "node quick-deploy.js",
-    "deploy:production": "node deploy-production.js",
-    "heroku-postbuild": "npm run build",
-    "deploy:check": "node -e \"console.log('✅ Deployment check passed')\"",
-    "health-check": "curl -f http://localhost:5000/api/health || exit 1"
+    "start": "npm run start --prefix backend",
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend/to_do_app\"",
+    "install-all": "npm install && npm install --prefix backend && npm install --prefix frontend/to_do_app"
   },
   "engines": {
     "node": ">=18.0.0",

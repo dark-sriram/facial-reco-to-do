@@ -96,9 +96,9 @@ const HomePage = () => {
                 </button> */}
               {/* </div> */}
 
-              <div className='max-w-7xl mx-auto p-6 mt-6 '>
+              <div className='max-w-7xl rounded-xl mx-auto p-6 mt-6 '>
                 {loading && (
-                  <div className='text-center text-2xl text-orange-900 py-20 '>
+                  <div className='text-cente text-2xl text-orange-900 py-20 '>
                     <div className="loading loading-spinner loading-lg"></div>
                     <p className="mt-4">Loading your tasks...</p>
                   </div>
@@ -107,7 +107,7 @@ const HomePage = () => {
                 {!loading && note.length === 0 && !isratelimited && <NotesNotFound/>}
 
                 {!loading && note.length > 0 && !isratelimited && (
-                  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                  <div className='grid  rounded-xl grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
                     {note.map((notes) => (
                       <NoteCard key={notes._id} notes={notes} setnote={setnote}/>
                     ))}

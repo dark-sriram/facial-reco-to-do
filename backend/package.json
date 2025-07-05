@@ -3,12 +3,9 @@
   "version": "1.0.0",
   "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon server-safe.js",
-    "dev:original": "nodemon src/server.js",
-    "dev:safe": "node start-safe.js",
-    "start": "node server-safe.js",
-    "start:original": "node src/server.js",
-    "start:safe": "node start-safe.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
   },
   "type": "module",
   "keywords": [],
