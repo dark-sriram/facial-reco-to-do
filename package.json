@@ -1,32 +1,5 @@
 {
-  "name": "facial-recognition-todo",
-  "version": "1.0.0",
-  "description": "A modern to-do list application that uses facial recognition for user authentication. Each user's tasks are personalized and accessible only through face recognition login.",
-  "main": "index.js",
-  "scripts": {
-    "build": "npm install --prefix backend && npm install --prefix frontend/to_do_app && npm run build --prefix frontend/to_do_app",
-    "start": "cross-env NODE_ENV=production npm run start --prefix backend",
-    "start:dev": "concurrently \"npm run start --prefix backend\" \"npm run dev --prefix frontend/to_do_app\"",
-    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend/to_do_app\"",
-    "install-all": "npm install && npm install --prefix backend && npm install --prefix frontend/to_do_app",
-    "deploy": "npm run build && npm start"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  },
-  "keywords": [
-    "facial-recognition",
-    "todo",
-    "react",
-    "nodejs",
-    "mongodb",
-    "face-api"
-  ],
-  "author": "Your Name",
-  "license": "MIT",
   "dependencies": {
-    "concurrently": "^8.2.2",
-    "cross-env": "^7.0.3"
+    "axios": "^1.10.0"
   }
 }
