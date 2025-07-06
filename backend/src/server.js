@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 import routes from './routes/routesNotes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -11,6 +14,9 @@ import rateLimiter from './middleware/rateLimiter.js';
 import errorHandler from './middleware/errorHandler.js';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -71,6 +77,20 @@ app.get('/api/test', (req, res) => {
 // API routes
 app.use('/api/notes', routes);
 app.use('/api/users', userRoutes);
+
+// Serve static files from the React app build directory in production
+if (process.env.NODE_ENV === 'production') {
+    const frontendDistPath = path.join(__dirname, '../../frontend/to_do_app/dist');
+    console.log(`🗂️  Serving static files from: ${frontendDistPath}`);
+    console.log(`📁 Directory exists: ${fs.existsSync(frontendDistPath)}`);
+    
+    app.use(express.static(frontendDistPath));
+    
+    // Handle React routing, return all requests to React app
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(frontendDistPath, 'index.html'));
+    });
+}
 
 // Add error handling middleware
 app.use((err, req, res, next) => {
