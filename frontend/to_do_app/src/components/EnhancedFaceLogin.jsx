@@ -268,7 +268,7 @@ const EnhancedFaceLogin = ({ onLogin, onRegister }) => {
             <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
                 <div className="text-center mb-6">
                     <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                        🎭 Face Recognition Todo
+                        Face Recognition To-do
                     </h1>
                     <p className="text-gray-600">
                         {showRegistration ? 'Register your face' : 'Login with your face'}
@@ -386,8 +386,8 @@ const EnhancedFaceLogin = ({ onLogin, onRegister }) => {
 
                 {/* Tips */}
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <h3 className="font-semibold text-blue-800 mb-2">💡 Tips for better recognition:</h3>
-                    <ul className="text-sm text-blue-700 space-y-1">
+                    <h3 className="font-semibold text-black mb-2"> Tips for better recognition:</h3>
+                    <ul className="text-sm text-black space-y-1">
                         <li>• Ensure good lighting on your face</li>
                         <li>• Look directly at the camera</li>
                         <li>• Keep your face centered in the frame</li>

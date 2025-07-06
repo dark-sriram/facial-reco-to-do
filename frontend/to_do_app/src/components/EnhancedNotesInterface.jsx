@@ -226,7 +226,7 @@ const EnhancedNotesInterface = ({ user, onLogout }) => {
                             <h1 className="text-4xl font-bold text-gray-900">
                                      My To-do
                             </h1>
-                            <div className="flex items-center space-x-2 text-sm text-black">
+                            <div className="flex items-center space-x-2 text-lg text-black">
                                 <User className="w-4 h-4" />
                                 <span>{user.name}</span>
                             </div>
